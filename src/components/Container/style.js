@@ -37,6 +37,8 @@ const Title = styled.h2`
 const CardBox = styled.div`
   padding: 1rem;
 
+  background-color: ${({ isOver }) => isOver ? '#CCC' : 'transparent'};
+
   overflow-y: auto;
   transition: all .15s ease-in-out;
 

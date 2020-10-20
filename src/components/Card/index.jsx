@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import Modal from 'react-modal'
 import { connect } from 'react-redux'
 import { CardService } from '../../services/api'
+import { useDrag } from 'react-dnd'
 import toggleUpdating from '../../store/actions/updating'
-import { Wrapper, Title, Delete, Update, Textarea, Confirm, Cancel } from './style'
+import { Wrapper, Title, Delete, Update, Textarea, Confirm, Cancel, Options } from './style'
+import { ItemTypes } from '../../dnd/items'
 
 Modal.setAppElement('#root')
 
@@ -24,14 +26,23 @@ const modalStyles = {
 }
 
 const Card = ({ id, idContainer, title, updating, dispatch}) => {
+  const cardService = new CardService()
+  const [ editable, setEditable ] = useState(false)
   const [ card, setCard ] = useState({
     id: id,
     title: title,
     idContainer: idContainer
   })
-  const [ editable, setEditable ] = useState(false)
 
-  const cardService = new CardService()
+  const [{ isDragging }, drag] = useDrag({
+    item: {
+      type: ItemTypes.CARD,
+      card: card
+    },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging()
+    }) 
+  })
 
   const handleOpenModal = (e) => {
     if (e.contentEl) {
@@ -39,7 +50,7 @@ const Card = ({ id, idContainer, title, updating, dispatch}) => {
     }
   }
 
-  const handleUpdate = (e) => {
+  const handleUpdate = (e, card) => {
     e.preventDefault()
     cardService.update(card)
       .catch(err => {})
@@ -56,23 +67,25 @@ const Card = ({ id, idContainer, title, updating, dispatch}) => {
   }
 
   return (
-    <Wrapper>
+    <Wrapper ref={drag} isDragging={isDragging}>
       <Title>{title}</Title>
       {editable && (
         <>
         <Modal onAfterOpen={(e) => handleOpenModal(e)} style={modalStyles} onRequestClose={() => setEditable(false)} isOpen={editable}>
-          <form onSubmit={(e) => handleUpdate(e)}>
+          <form onSubmit={(e) => handleUpdate(e, card)}>
             <Textarea onChange={e => setCard({...card, title: e.target.value})} defaultValue={card.title} placeholder='Digite alguma coisa...'/>
-            <div>
-              <Confirm type='submit'>Atualizar</Confirm>
-              <Cancel onClick={() => setEditable(!editable)} type='button'>Cancelar</Cancel>
-            </div>
+            <Options>
+              <div>
+                <Confirm type='submit'>Atualizar</Confirm>
+                <Cancel onClick={() => setEditable(!editable)} type='button'>Cancelar</Cancel>
+              </div>
+              <Delete onClick={() => handleDelete()}>Excluir</Delete>
+            </Options>
           </form>
         </Modal>
         </>
       )}
-      <Update onClick={() => setEditable(true)}>E</Update>
-      <Delete onClick={() => handleDelete()}>X</Delete>
+      <Update onClick={() => setEditable(true)}/>
     </Wrapper>
   )
 }

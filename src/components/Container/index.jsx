@@ -1,13 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux'
+import { useDrop } from 'react-dnd'
 import toggleUpdating from '../../store/actions/updating'
 import Card from '../Card'
 import NewCard from '../NewCard'
 import { CardService, ContainerService } from '../../services/api/index'
 import { Wrapper, Title, CardBox, Delete, Update, Form, Textarea, Confirm, Cancel } from './style'
 import useOutsideClick from '../../hooks/useOutsideClick'
+import { ItemTypes } from '../../dnd/items'
 
 const Container = ({ title, id, updating, dispatch }) => {
+  const cardService = new CardService()
+  const containerService = new ContainerService()
   const [ container, setContainer ] = useState({
     id: id,
     title: title
@@ -16,8 +20,26 @@ const Container = ({ title, id, updating, dispatch }) => {
   const [ editable, setEditable ] = useState(false)
   const formRef = useRef(null)
 
-  const cardService = new CardService()
-  const containerService = new ContainerService()
+  const [{ isOver }, drop] = useDrop({
+    accept: ItemTypes.CARD,
+    drop: (item) => handleUpdateCardContainer(item.card, container),
+    collect: monitor => ({
+      isOver: !!monitor.isOver()
+    })
+  })
+
+  const handleUpdateCardContainer = useCallback((card, container) => {
+    if (card.idContainer !== container.id) {
+      const updatedCard = card
+      updatedCard.idContainer = container.id
+      cardService.update(card)
+        .then(res => console.log(res.data))
+        .catch(err => {})
+        .finally(() => {
+          dispatch(toggleUpdating(!updating))
+        })
+    }
+  }, [ drop, cardService, dispatch, updating ])
 
   useOutsideClick(formRef, () => {
     editable && setEditable(false)
@@ -31,7 +53,7 @@ const Container = ({ title, id, updating, dispatch }) => {
     cardService.getAllByContainer(id)
       .then(res => setCards(res.data))
       .catch(err => {})
-  }, [updating])
+  }, [updating, cardService, id])
 
   const handleUpdate = (e) => {
     e.preventDefault()
@@ -64,7 +86,7 @@ const Container = ({ title, id, updating, dispatch }) => {
             </div>
         </Form>
       )}
-      <CardBox>
+      <CardBox ref={drop} isOver={isOver}>
         {cards?.map((item, index) => (
           <Card key={index} title={item.title} id={item.id} idContainer={id}/>
         ))}
