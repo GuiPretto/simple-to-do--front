@@ -1,0 +1,16 @@
+body {
+  background-color: #ddd;
+}
+
+button,
+input,
+textarea,
+a {
+  font-family: 'Quicksand', sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Quicksand', sans-serif;
+}
