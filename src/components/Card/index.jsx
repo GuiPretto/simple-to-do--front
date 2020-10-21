@@ -1,11 +1,21 @@
 import React, { useState } from 'react'
+
+// Libraries
 import Modal from 'react-modal'
 import { connect } from 'react-redux'
-import { CardService } from '../../services/api'
 import { useDrag } from 'react-dnd'
+
+// Api
+import { CardService } from '../../services/api'
+
+// Hooks
 import toggleUpdating from '../../store/actions/updating'
-import { Wrapper, Title, Delete, Update, Textarea, Confirm, Cancel, Options } from './style'
+
+// ReactDnD Items
 import { ItemTypes } from '../../dnd/items'
+
+// Components
+import { Wrapper, Title, Delete, Update, Textarea, Confirm, Cancel, Options } from './style'
 
 Modal.setAppElement('#root')
 
@@ -62,7 +72,7 @@ const Card = ({ id, idContainer, title, updating, dispatch}) => {
 
   const handleDelete = () => {
     cardService.remove(card.id)
-      .catch(err => {})
+      .catch(err => console.log(err))
       .finally(() => dispatch(toggleUpdating(!updating)))
   }
 
@@ -70,7 +80,6 @@ const Card = ({ id, idContainer, title, updating, dispatch}) => {
     <Wrapper ref={drag} isDragging={isDragging}>
       <Title>{title}</Title>
       {editable && (
-        <>
         <Modal onAfterOpen={(e) => handleOpenModal(e)} style={modalStyles} onRequestClose={() => setEditable(false)} isOpen={editable}>
           <form onSubmit={(e) => handleUpdate(e, card)}>
             <Textarea onChange={e => setCard({...card, title: e.target.value})} defaultValue={card.title} placeholder='Digite alguma coisa...'/>
@@ -83,7 +92,6 @@ const Card = ({ id, idContainer, title, updating, dispatch}) => {
             </Options>
           </form>
         </Modal>
-        </>
       )}
       <Update onClick={() => setEditable(true)}/>
     </Wrapper>

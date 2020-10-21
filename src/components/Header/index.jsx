@@ -1,4 +1,6 @@
 import React from 'react'
+
+// Components
 import { Wrapper, Title } from './style'
 
 const Header = () => (

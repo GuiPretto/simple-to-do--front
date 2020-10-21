@@ -1,23 +1,35 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+
+// Libraries
 import { connect } from 'react-redux'
 import { useDrop } from 'react-dnd'
+
+// Api
+import { CardService, ContainerService } from '../../services/api/index'
+
+// Hooks
+import useOutsideClick from '../../hooks/useOutsideClick'
+
+// Redux Store
 import toggleUpdating from '../../store/actions/updating'
+
+// ReactDnd
+import { ItemTypes } from '../../dnd/items'
+
+// Components
 import Card from '../Card'
 import NewCard from '../NewCard'
-import { CardService, ContainerService } from '../../services/api/index'
 import { Wrapper, Title, CardBox, Delete, Update, Form, Textarea, Confirm, Cancel } from './style'
-import useOutsideClick from '../../hooks/useOutsideClick'
-import { ItemTypes } from '../../dnd/items'
 
 const Container = ({ title, id, updating, dispatch }) => {
   const cardService = new CardService()
   const containerService = new ContainerService()
+  const [ cards, setCards ] = useState(null)
+  const [ editable, setEditable ] = useState(false)
   const [ container, setContainer ] = useState({
     id: id,
     title: title
   })
-  const [ cards, setCards ] = useState(null)
-  const [ editable, setEditable ] = useState(false)
   const formRef = useRef(null)
 
   const [{ isOver }, drop] = useDrop({
@@ -34,7 +46,7 @@ const Container = ({ title, id, updating, dispatch }) => {
       updatedCard.idContainer = container.id
       cardService.update(card)
         .then(res => console.log(res.data))
-        .catch(err => {})
+        .catch(err => console.log(err))
         .finally(() => {
           dispatch(toggleUpdating(!updating))
         })
@@ -52,14 +64,14 @@ const Container = ({ title, id, updating, dispatch }) => {
   useEffect(() => {
     cardService.getAllByContainer(id)
       .then(res => setCards(res.data))
-      .catch(err => {})
+      .catch(err => console.log(err))
   }, [updating, cardService, id])
 
   const handleUpdate = (e) => {
     e.preventDefault()
 
     containerService.update(container)
-      .catch(err => {})
+      .catch(err => console.log(err))
       .finally(() => {
         dispatch(toggleUpdating(!updating))
         setEditable(false)
@@ -68,7 +80,7 @@ const Container = ({ title, id, updating, dispatch }) => {
 
   const handleDelete = (id) => {
     containerService.remove(id)
-      .catch(err => {})
+      .catch(err => console.log(err))
       .finally(() => dispatch(toggleUpdating(!updating)))
   }
 

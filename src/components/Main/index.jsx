@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react'
+
+// Libraries
 import { connect } from 'react-redux'
+
+// Components
 import Container from '../Container'
-import { ContainerService } from '../../services/api/index'
-import { Wrapper } from './style'
 import NewContainer from '../NewContainer'
+import { Wrapper } from './style'
+
+// Api
+import { ContainerService } from '../../services/api/index'
 
 const Main = ({ updating }) => {
   const [ containers, setContainers ] = useState(null)

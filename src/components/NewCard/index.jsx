@@ -1,8 +1,18 @@
 import React, { useRef, useState } from 'react'
+
+// Libraries
 import { connect } from 'react-redux'
-import toggleUpdating from '../../store/actions/updating'
+
+// Hooks
 import useOutsideClick from '../../hooks/useOutsideClick'
+
+// Api
 import { CardService } from '../../services/api/index'
+
+// Redux Store
+import toggleUpdating from '../../store/actions/updating'
+
+// Components
 import { Wrapper, Button, Form, Textarea, Confirm, Cancel } from './style'
 
 const NewCard = ({ idContainer, updating, dispatch }) => {
